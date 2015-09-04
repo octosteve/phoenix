@@ -194,13 +194,17 @@ defmodule Phoenix.Socket.Transport do
   def dispatch(msg, sockets, socket)
 
   def dispatch(%{ref: ref, topic: "phoenix", event: "heartbeat"}, _sockets, _socket) do
-    {:reply, %Reply{ref: ref, topic: "phoenix", status: :ok, payload: %{}}}
+    {:reply, heartbeat_message(ref)}
   end
 
   def dispatch(%Message{} = msg, sockets, socket) do
     sockets
     |> HashDict.get(msg.topic)
     |> do_dispatch(msg, socket)
+  end
+
+  def heartbeat_message(ref \\ nil) do
+    %Reply{ref: ref, topic: "phoenix", status: :ok, payload: %{}}
   end
 
   defp do_dispatch(nil, %{event: "phx_join", topic: topic} = msg, socket) do

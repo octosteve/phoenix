@@ -95,6 +95,8 @@ defmodule Phoenix.Transports.WebSocket do
 
     if socket.id, do: socket.endpoint.subscribe(self, socket.id, link: true)
 
+    :timer.send_interval(30_000, self, :phoenix_heartbeat)
+
     {:ok, %{socket: socket,
             channels: HashDict.new,
             channels_inverse: HashDict.new,
@@ -115,6 +117,11 @@ defmodule Phoenix.Transports.WebSocket do
       {:error, _reason, error_reply_msg} ->
         encode_reply(error_reply_msg, state)
     end
+  end
+
+  def ws_info(:phoenix_heartbeat, state) do
+    IO.puts "heartbeat"
+    encode_reply Transport.heartbeat_message(), state
   end
 
   @doc false
